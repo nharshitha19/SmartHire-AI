@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Candidate Dashboard - SmartHire AI</title>
+  <meta name="description" content="Candidate portal for resume uploads, mock interview practice, performance analytics, and improvement tracking.">
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <!-- Google Fonts & Local FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/fontawesome/css/all.min.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Sticky Navbar -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">
+          <i class="fa-solid fa-brain"></i>
+        </div>
+        <span>SmartHire <span class="gradient-text">AI</span></span>
+      </a>
+      
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="candidate.html" class="active">Candidate</a>
+        <a href="recruiter.html">Recruiter</a>
+        <a href="admin.html">Admin</a>
+      </div>
+
+      <div class="nav-actions">
+        <div id="candidate-notif-bell-wrapper" style="position: relative; display: inline-block; margin-right: 1rem; cursor: pointer;" onclick="toggleNotificationDropdown('CANDIDATE')">
+          <i class="fa-solid fa-bell" style="font-size: 1.25rem; color: var(--text-main);"></i>
+          <span id="candidate-notif-badge" style="position: absolute; top: -5px; right: -8px; background: #EF4444; color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 10px; display: none;">0</span>
+          
+          <div id="candidate-notif-dropdown" style="display: none; position: absolute; right: 0; top: 35px; width: 320px; background: #1E293B; border: 1px solid #334155; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000; padding: 1rem; color: #F8FAFC; text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 0.5rem; margin-bottom: 0.5rem;">
+              <strong style="font-size: 0.9rem;"><i class="fa-solid fa-bell"></i> Notifications</strong>
+              <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); markAllNotificationsReadUI();" style="font-size: 0.75rem; padding: 2px 8px;">Mark All Read</button>
+            </div>
+            <div id="candidate-notif-list" style="max-height: 250px; overflow-y: auto; font-size: 0.825rem;">
+              <div style="text-align: center; color: #94A3B8; padding: 1rem;">No notifications yet.</div>
+            </div>
+          </div>
+        </div>
+
+        <a href="login.html" class="btn btn-secondary btn-sm">
+          <i class="fa-solid fa-right-to-bracket"></i> Login
+        </a>
+        <button class="mobile-toggle" aria-label="Toggle navigation">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Dashboard Layout -->
+  <div class="dashboard-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <ul class="sidebar-menu">
+        <li class="sidebar-item">
+          <a href="candidate.html" class="active">
+            <i class="fa-solid fa-chart-line"></i> Dashboard
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="#" onclick="document.getElementById('candidate-assigned-interviews-section').scrollIntoView({behavior: 'smooth'}); return false;">
+            <i class="fa-solid fa-headset" style="color: var(--secondary);"></i> Assigned Interviews
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="#" onclick="openRankingModal(); return false;">
+            <i class="fa-solid fa-trophy"></i> Ranking System
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="#" onclick="openResumeUploadModal(); return false;">
+            <i class="fa-solid fa-cloud-arrow-up"></i> Resume Upload
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="#" onclick="openPerformanceAnalyticsModal(); return false;">
+            <i class="fa-solid fa-chart-pie"></i> Performance Analytics
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="#" onclick="document.querySelector('.table-card').scrollIntoView({behavior: 'smooth'}); return false;">
+            <i class="fa-solid fa-clock-rotate-left"></i> Interview History
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="#" onclick="downloadCandidateReportPDF(); return false;">
+            <i class="fa-solid fa-file-invoice"></i> Download Reports
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="#" onclick="openImprovementProgressModal(); return false;">
+            <i class="fa-solid fa-arrow-trend-up"></i> Track Progress
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="#" onclick="openReportIssueModal('CANDIDATE'); return false;">
+            <i class="fa-solid fa-triangle-exclamation"></i> Report Issue
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="dashboard-main">
+      <!-- Header Title -->
+      <div class="dashboard-header">
+        <div class="dashboard-title">
+          <h1>Candidate Dashboard</h1>
+          <p>Track your interview readiness, ATS resume score, and skill growth timeline.</p>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openResumeUploadModal()">
+          <i class="fa-solid fa-upload"></i> Upload CV / Resume
+        </button>
+      </div>
+
+      <!-- Welcome Banner Card -->
+      <div class="welcome-card">
+        <div class="welcome-text">
+          <h2 id="candidate-welcome-text">Welcome back, <span id="candidate-display-name">Candidate</span>! 👋</h2>
+          <p>Your ATS resume score increased by 18% this week. You're in the top 5% of candidates for Senior Frontend Developer roles.</p>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="openPerformanceAnalyticsModal()" style="color: var(--primary);">
+          View Analytics
+        </button>
+      </div>
+
+      <!-- Quick Stats Cards Grid -->
+      <div class="stats-cards-grid">
+        <div class="dash-stat-card">
+          <div class="stat-icon-wrapper blue">
+            <i class="fa-solid fa-file-lines"></i>
+          </div>
+          <div class="stat-info">
+            <h4>Resume ATS Score</h4>
+            <div class="value">88/100</div>
+            <div class="trend up"><i class="fa-solid fa-arrow-up"></i> +6 pts vs last ATS check</div>
+          </div>
+        </div>
+
+        <div class="dash-stat-card">
+          <div class="stat-icon-wrapper purple">
+            <i class="fa-solid fa-headset"></i>
+          </div>
+          <div class="stat-info">
+            <h4>Interview Score</h4>
+            <div class="value">92%</div>
+            <div class="trend up"><i class="fa-solid fa-arrow-up"></i> +12% performance</div>
+          </div>
+        </div>
+
+        <div class="dash-stat-card">
+          <div class="stat-icon-wrapper cyan">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+          <div class="stat-info">
+            <h4>Completed Interviews</h4>
+            <div class="value">14</div>
+            <div class="trend up"><i class="fa-solid fa-check"></i> 4 completed this month</div>
+          </div>
+        </div>
+
+        <div class="dash-stat-card">
+          <div class="stat-icon-wrapper amber">
+            <i class="fa-solid fa-arrow-trend-up"></i>
+          </div>
+          <div class="stat-info">
+            <h4>Improvement %</h4>
+            <div class="value">+24%</div>
+            <div class="trend up"><i class="fa-solid fa-arrow-up"></i> Consistent growth</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature Cards Grid (Candidate Action Features) -->
+      <div class="dashboard-grid">
+
+        <!-- 1. Upload Resume -->
+        <div class="dashboard-card">
+          <div>
+            <div class="dash-card-header">
+              <h3><i class="fa-solid fa-cloud-arrow-up"></i> Upload Resumes</h3>
+              <span class="badge-status info">ATS Ready</span>
+            </div>
+            <div class="dash-card-body">
+              Upload your latest CV in PDF, DOC, or DOCX format to receive instant ATS scoring, keyword matching, and targeted improvements.
+              <div class="css-chart-box">
+                <div class="progress-bar-group">
+                  <div class="progress-label">
+                    <span>Keyword Match</span>
+                    <span>94%</span>
+                  </div>
+                  <div class="progress-track">
+                    <div class="progress-fill" style="width: 94%;"></div>
+                  </div>
+                </div>
+                <div class="progress-bar-group" style="margin-bottom: 0;">
+                  <div class="progress-label">
+                    <span>ATS Formatting</span>
+                    <span>88%</span>
+                  </div>
+                  <div class="progress-track">
+                    <div class="progress-fill secondary" style="width: 88%;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="openResumeUploadModal()">
+            <i class="fa-solid fa-upload"></i> Upload New Resume
+          </button>
+        </div>
+
+        <!-- 2. Attend Mock Interviews -->
+        <div class="dashboard-card">
+          <div>
+            <div class="dash-card-header">
+              <h3><i class="fa-solid fa-headset"></i> Attend Mock Interviews</h3>
+              <span class="badge-status success">AI Active</span>
+            </div>
+            <div class="dash-card-body">
+              Participate in adaptive voice and text AI mock interview sessions customized for Technical, Behavioral, and System Design rounds.
+              <div class="css-chart-box" style="text-align: center; padding: 1.5rem 0.5rem;">
+                <i class="fa-solid fa-microphone-lines" style="font-size: 2.2rem; color: var(--secondary); margin-bottom: 0.5rem;"></i>
+                <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-main);">Real-time AI Voice Engine Active</div>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-accent btn-full" onclick="document.getElementById('candidate-assigned-interviews-section').scrollIntoView({behavior: 'smooth'}); showDemoToast('Please select your assigned interview session below to begin.', 'info');">
+            <i class="fa-solid fa-play"></i> Start Mock Interview
+          </button>
+
+        </div>
+
+        <!-- 3. View Interview History -->
+        <div class="dashboard-card">
+          <div>
+            <div class="dash-card-header">
+              <h3><i class="fa-solid fa-clock-rotate-left"></i> View Interview History</h3>
+              <span class="badge-status info">14 Sessions</span>
+            </div>
+            <div class="dash-card-body">
+              Review transcripts, recorded answers, ATS critique notes, and historical scores for all your completed practice sessions.
+              <div class="css-chart-box">
+                <div style="font-size: 0.85rem; display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                  <span>React Senior Dev Round</span>
+                  <strong style="color: var(--primary);">94% Score</strong>
+                </div>
+                <div style="font-size: 0.85rem; display: flex; justify-content: space-between;">
+                  <span>Behavioral Leadership</span>
+                  <strong style="color: var(--secondary);">89% Score</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-secondary btn-full" onclick="document.querySelector('.table-card').scrollIntoView({behavior: 'smooth'})">
+            <i class="fa-solid fa-list-ul"></i> View Full History Log
+          </button>
+        </div>
+
+        <!-- 4. Access Performance Analytics -->
+        <div class="dashboard-card">
+          <div>
+            <div class="dash-card-header">
+              <h3><i class="fa-solid fa-chart-line"></i> Performance Analytics</h3>
+              <span class="badge-status success">+18% Weekly</span>
+            </div>
+            <div class="dash-card-body">
+              Explore deep analytics on response velocity, technical accuracy, confidence metrics, and clarity scoring across domains.
+              <div class="bar-chart-visual">
+                <div class="bar-column" title="Session 1"><div class="bar-column-inner" style="height: 55%;"></div></div>
+                <div class="bar-column" title="Session 2"><div class="bar-column-inner" style="height: 70%;"></div></div>
+                <div class="bar-column" title="Session 3"><div class="bar-column-inner" style="height: 65%;"></div></div>
+                <div class="bar-column" title="Session 4"><div class="bar-column-inner" style="height: 85%;"></div></div>
+                <div class="bar-column" title="Session 5"><div class="bar-column-inner" style="height: 92%;"></div></div>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-secondary btn-full" onclick="openPerformanceAnalyticsModal()">
+            <i class="fa-solid fa-chart-pie"></i> Explore Analytics
+          </button>
+        </div>
+
+        <!-- 5. Download Reports -->
+        <div class="dashboard-card">
+          <div>
+            <div class="dash-card-header">
+              <h3><i class="fa-solid fa-file-pdf"></i> Download Reports</h3>
+              <span class="badge-status info">PDF Ready</span>
+            </div>
+            <div class="dash-card-body">
+              Generate and download recruiter-ready evaluation reports summarizing your technical strengths and interview readiness.
+              <div class="css-chart-box" style="display: flex; align-items: center; gap: 0.75rem;">
+                <i class="fa-solid fa-file-pdf" style="font-size: 2rem; color: #EF4444;"></i>
+                <div style="font-size: 0.85rem;">
+                  <strong>Candidate_ATS_Evaluation_Report.pdf</strong>
+                  <div style="color: var(--text-muted);">Generated 2 hours ago • 2.4 MB</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="downloadCandidateReportPDF()">
+            <i class="fa-solid fa-download"></i> Download Report PDF
+          </button>
+        </div>
+
+        <!-- 6. Track Improvement Progress -->
+        <div class="dashboard-card">
+          <div>
+            <div class="dash-card-header">
+              <h3><i class="fa-solid fa-arrow-trend-up"></i> Track Progress</h3>
+              <span class="badge-status warning">On Track</span>
+            </div>
+            <div class="dash-card-body">
+              Monitor your skill milestone progression, weak spots resolution rate, and personalized practice recommendations.
+              <div class="css-chart-box">
+                <div class="progress-bar-group" style="margin-bottom: 0.5rem;">
+                  <div class="progress-label">
+                    <span>System Architecture</span>
+                    <span>78%</span>
+                  </div>
+                  <div class="progress-track">
+                    <div class="progress-fill" style="width: 78%; background: var(--accent);"></div>
+                  </div>
+                </div>
+                <div class="progress-bar-group" style="margin-bottom: 0;">
+                  <div class="progress-label">
+                    <span>Algorithms & Data Struct.</span>
+                    <span>91%</span>
+                  </div>
+                  <div class="progress-track">
+                    <div class="progress-fill" style="width: 91%;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-secondary btn-full" onclick="openImprovementProgressModal()">
+            <i class="fa-solid fa-bullseye"></i> View Growth Roadmap
+          </button>
+        </div>
+
+        <!-- 7. Ranking System & Leaderboard -->
+        <div class="dashboard-card">
+          <div>
+            <div class="dash-card-header">
+              <h3><i class="fa-solid fa-trophy" style="color: #F59E0B;"></i> Candidate Ranking System</h3>
+              <span class="badge-status success">Top 2%</span>
+            </div>
+            <div class="dash-card-body">
+              View your Overall Rank (#14), College Rank (#3), and Global Rank (#142) alongside unlocked achievement badges.
+              <div class="css-chart-box" style="display: flex; justify-content: space-around; text-align: center;">
+                <div>
+                  <div style="font-size: 1.25rem; font-weight: 800; color: var(--primary);">#14</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">Overall</div>
+                </div>
+                <div>
+                  <div style="font-size: 1.25rem; font-weight: 800; color: var(--secondary);">#3</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">College</div>
+                </div>
+                <div>
+                  <div style="font-size: 1.25rem; font-weight: 800; color: var(--accent);">#142</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">Global</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="openRankingModal()">
+            <i class="fa-solid fa-medal"></i> View Leaderboard & Badges
+          </button>
+        </div>
+
+        <!-- 8. Report Issue -->
+        <div class="dashboard-card">
+          <div>
+            <div class="dash-card-header">
+              <h3><i class="fa-solid fa-triangle-exclamation" style="color: #EF4444;"></i> Report Incident / Conduct Issue</h3>
+              <span class="badge-status warning">Support Active</span>
+            </div>
+            <div class="dash-card-body">
+              Report illegal interview questions, recruiter misconduct, fake job postings, technical glitches, or platform abuse.
+              <div class="css-chart-box" style="font-size: 0.85rem; color: var(--text-muted);">
+                <i class="fa-solid fa-shield-halved" style="color: var(--primary);"></i> Reports are saved into PostgreSQL and reviewed by admins.
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-secondary btn-full" onclick="openReportIssueModal('CANDIDATE')">
+            <i class="fa-solid fa-flag"></i> Submit Issue Report
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Module 9: Upcoming Interview Reminders Container -->
+      <div id="candidate-reminders-container" style="margin-top: 1.5rem; display: none;">
+        <!-- Rendered dynamically by script.js -->
+      </div>
+
+      <!-- Module 3: Assigned AI Interviews Section -->
+      <div id="candidate-assigned-interviews-section" class="table-card" style="margin-top: 2rem; border-top: 4px solid var(--secondary);">
+
+        <div class="table-card-header">
+          <div>
+            <h3 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+              <i class="fa-solid fa-headset" style="color: var(--secondary);"></i> Assigned AI Interviews
+            </h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
+              Active and assigned interviews generated specifically for your target domain and skill set.
+            </p>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="loadCandidateAssignedInterviews()">
+            <i class="fa-solid fa-arrows-rotate"></i> Refresh List
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Created Date</th>
+                <th>Target Domain</th>
+                <th>Interview Type</th>
+                <th>Difficulty</th>
+                <th>Questions</th>
+                <th>Duration</th>
+                <th>Status</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="candidate-assigned-interviews-table-body">
+              <!-- Rendered dynamically by script.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Candidate Interview History Log Table -->
+      <div class="table-card" style="margin-top: 2rem;">
+        <div class="table-card-header">
+          <h3><i class="fa-solid fa-clock-rotate-left" style="color: var(--primary);"></i> Recent Mock Interview History</h3>
+          <button class="btn btn-secondary btn-sm" onclick="exportInterviewHistoryCSV()">
+            <i class="fa-solid fa-file-export"></i> Export CSV
+          </button>
+        </div>
+
+        <!-- Search, Filter & Sort Controls -->
+        <div class="filter-bar">
+          <div class="search-input-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="cand-hist-search" class="form-control" placeholder="Search sessions by role or topic..." oninput="filterCandidateHistoryTable()">
+          </div>
+          <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 0.35rem;">
+              <label style="font-weight: 600; font-size: 0.8rem; color: var(--text-muted);">Status:</label>
+              <select id="cand-hist-status" class="form-control" style="width: 140px;" onchange="filterCandidateHistoryTable()">
+                <option value="ALL">All Statuses</option>
+                <option value="COMPLETED">Completed</option>
+                <option value="SCHEDULED">Scheduled</option>
+                <option value="IN_PROGRESS">In Progress</option>
+              </select>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.35rem;">
+              <label style="font-weight: 600; font-size: 0.8rem; color: var(--text-muted);">Sort By:</label>
+              <select id="cand-hist-sort" class="form-control" style="width: 160px;" onchange="filterCandidateHistoryTable()">
+                <option value="DATE_DESC">Newest First</option>
+                <option value="DATE_ASC">Oldest First</option>
+                <option value="SCORE_DESC">Highest ATS Score</option>
+                <option value="SCORE_ASC">Lowest ATS Score</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Date & Time</th>
+                <th>Target Role</th>
+                <th>Session Type</th>
+                <th>Duration</th>
+                <th>ATS Score</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="candidate-history-table-body">
+              <!-- Dynamically rendered by script.js -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border-color); font-size: 0.85rem;">
+          <span style="color: var(--text-muted);" id="cand-hist-showing">Showing 1-3 of 3 interview sessions</span>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-secondary btn-sm" onclick="changeCandidateHistoryPage(-1)"><i class="fa-solid fa-chevron-left"></i> Previous</button>
+            <button class="btn btn-secondary btn-sm" onclick="changeCandidateHistoryPage(1)">Next <i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+        </div>
+        <!-- Report Sharing & Privacy Control Card -->
+        <div class="card" style="margin-top: 1.5rem;" id="candidate-privacy-card">
+          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h3><i class="fa-solid fa-shield-halved" style="color: var(--primary);"></i> Report Sharing & Privacy Control</h3>
+            <button class="btn btn-secondary btn-sm" onclick="loadCandidatePrivacyTableUI()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+          </div>
+          <div class="card-body">
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+              Manage recruiter access to your interview performance reports and scores. You can grant or revoke consent at any time.
+            </p>
+            <div id="candidate-privacy-table-container">
+              <!-- Dynamically rendered by script.js via loadCandidatePrivacyTableUI() -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom" style="border-top: none; padding-top: 0;">
+        <p>&copy; 2026 SmartHire AI Candidate Portal. Connected with Module 1 Authentication.</p>
+        <div style="display: flex; gap: 1.25rem;">
+          <a href="index.html">Home</a>
+          <a href="login.html">Login</a>
+          <a href="recruiter.html">Recruiter</a>
+          <a href="admin.html">Admin</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Dynamic Modals for Candidate Dashboard -->
+
+  <!-- 1. Auth Required Modal -->
+  <div class="smarthire-modal-backdrop" id="authRequiredModal">
+    <div class="smarthire-modal" style="max-width: 480px; text-align: center;">
+      <div class="smarthire-modal-header" style="justify-content: center; background: transparent;">
+        <h3><i class="fa-solid fa-shield-halved" style="color: var(--primary);"></i> Security Guard</h3>
+      </div>
+      <div class="smarthire-modal-body">
+        <div class="auth-security-icon">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <h3 style="font-size: 1.35rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);">Authentication Required</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.25rem;">You must login to continue accessing this page.</p>
+        <div style="display: flex; gap: 0.75rem; justify-content: center;">
+          <a href="login.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
+          <a href="index.html" class="btn btn-secondary btn-sm"><i class="fa-solid fa-house"></i> Go Home</a>
+        </div>
+        <div class="auth-redirect-timer">
+          <div class="auth-redirect-bar" id="authRedirectBar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Resume Upload Modal -->
+  <div class="smarthire-modal-backdrop" id="resumeUploadModal">
+    <div class="smarthire-modal" style="max-width: 560px;">
+      <div class="smarthire-modal-header">
+        <h3><i class="fa-solid fa-cloud-arrow-up"></i> Upload Candidate Resume</h3>
+        <button class="smarthire-modal-close" onclick="closeModal('resumeUploadModal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="smarthire-modal-body">
+        <div class="drop-zone" id="resumeDropZone" onclick="document.getElementById('resumeFileInput').click()">
+          <i class="fa-solid fa-file-arrow-up"></i>
+          <h4 style="font-weight: 700; margin-bottom: 0.35rem;">Drag & Drop your resume here</h4>
+          <p style="color: var(--text-muted); font-size: 0.85rem;">Supports PDF, DOCX (Max 5MB)</p>
+          <button type="button" class="btn btn-secondary btn-sm" style="margin-top: 1rem;">Browse Files</button>
+          <input type="file" id="resumeFileInput" accept=".pdf,.doc,.docx" style="display: none;" onchange="handleResumeFileSelect(this.files)">
+        </div>
+
+        <div class="upload-progress-container" id="resumeUploadProgress" style="display: none;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600;">
+            <span id="uploadFileName">Uploading file...</span>
+            <span id="uploadPercentage">0%</span>
+          </div>
+          <div class="upload-progress-bar-wrap">
+            <div class="upload-progress-fill" id="uploadProgressFill"></div>
+          </div>
+        </div>
+
+        <div id="resumeStatusCard" style="display: none; margin-top: 1rem; padding: 1rem; background: var(--primary-light); border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong id="activeResumeName" style="color: var(--text-main); font-size: 0.9rem;">No resume uploaded</strong>
+              <div id="activeResumeTime" style="font-size: 0.75rem; color: var(--text-muted);">Uploaded: --</div>
+            </div>
+            <span class="badge-resolved"><i class="fa-solid fa-check"></i> Active</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Mock Interview Simulator Modal -->
+  <div class="smarthire-modal-backdrop" id="mockInterviewModal">
+    <div class="smarthire-modal" style="max-width: 720px;">
+      <div class="smarthire-modal-header">
+        <h3 id="simulatorModalTitle"><i class="fa-solid fa-laptop-code"></i> Mock Interview Simulator</h3>
+        <button class="smarthire-modal-close" onclick="closeModal('mockInterviewModal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="smarthire-modal-body">
+        <!-- Category Selection Screen -->
+        <div id="simulatorCategoryScreen">
+          <p style="color: var(--text-muted); margin-bottom: 1.25rem;">Select an interview domain to load predefined mock questions from backend database:</p>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+            <button class="btn btn-secondary" onclick="startMockSimulator('Technical')" style="padding: 1.5rem 1rem; flex-direction: column; gap: 0.5rem;">
+              <i class="fa-solid fa-code" style="font-size: 1.5rem; color: var(--primary);"></i>
+              <strong>Technical</strong>
+              <span style="font-size: 0.75rem; opacity: 0.8;">React, SQL, BST, JWT</span>
+            </button>
+            <button class="btn btn-secondary" onclick="startMockSimulator('HR')" style="padding: 1.5rem 1rem; flex-direction: column; gap: 0.5rem;">
+              <i class="fa-solid fa-users-gear" style="font-size: 1.5rem; color: #10B981;"></i>
+              <strong>HR Round</strong>
+              <span style="font-size: 0.75rem; opacity: 0.8;">Career goals & team fit</span>
+            </button>
+            <button class="btn btn-secondary" onclick="startMockSimulator('Behavioral')" style="padding: 1.5rem 1rem; flex-direction: column; gap: 0.5rem;">
+              <i class="fa-solid fa-comments" style="font-size: 1.5rem; color: #F59E0B;"></i>
+              <strong>Behavioral</strong>
+              <span style="font-size: 0.75rem; opacity: 0.8;">STAR method scenarios</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Interview Preparation & Hardware Verification Screen -->
+        <div id="simulatorSetupScreen" style="display: none;">
+          <div style="background: var(--primary-light); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1rem; border: 1px solid var(--border-color);">
+            <h4 style="font-weight: 700; color: var(--text-main); margin-bottom: 0.35rem;"><i class="fa-solid fa-camera"></i> Camera & Microphone Hardware Verification</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Please grant camera and microphone permissions and verify your hardware stream below before beginning your interview.</p>
+          </div>
+
+          <!-- Live Webcam Preview Container -->
+          <div id="setupWebcamContainer" style="margin-bottom: 1rem; border-radius: var(--radius-sm); overflow: hidden; background: #0f172a; text-align: center; position: relative; border: 1px solid var(--border-color);">
+            <video id="interviewWebcamPreview" autoplay muted playsinline style="width: 100%; max-height: 240px; object-fit: cover; display: block; background: #0f172a;"></video>
+            <div style="position: absolute; bottom: 8px; left: 8px; display: flex; gap: 0.5rem; flex-wrap: wrap; z-index: 10;">
+              <span id="cameraStatusBadge" class="badge-status secondary" style="font-size: 0.75rem;"><i class="fa-solid fa-video"></i> Camera: Not checked</span>
+              <span id="micStatusBadge" class="badge-status secondary" style="font-size: 0.75rem;"><i class="fa-solid fa-microphone"></i> Mic: Not checked</span>
+              <span id="recordingStatusBadge" class="badge-status info" style="font-size: 0.75rem;"><i class="fa-solid fa-circle"></i> Recording: Inactive</span>
+            </div>
+          </div>
+
+          <!-- Device Checklist -->
+          <div id="hardwareChecklist" style="margin-bottom: 1rem; padding: 0.85rem 1rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
+              <span style="font-size: 0.85rem; font-weight: 600;"><i class="fa-solid fa-video" style="color: var(--primary); margin-right: 0.5rem;"></i> Camera Permission</span>
+              <span id="cameraCheckIcon" style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted);"><i class="fa-solid fa-circle-notch fa-spin"></i> Checking...</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
+              <span style="font-size: 0.85rem; font-weight: 600;"><i class="fa-solid fa-microphone" style="color: var(--secondary); margin-right: 0.5rem;"></i> Microphone Permission</span>
+              <span id="micCheckIcon" style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted);"><i class="fa-solid fa-circle-notch fa-spin"></i> Checking...</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 0.85rem; font-weight: 600;"><i class="fa-solid fa-expand" style="color: #F59E0B; margin-right: 0.5rem;"></i> Fullscreen Mode Monitoring</span>
+              <span style="font-size: 0.85rem; font-weight: 700; color: var(--primary);"><i class="fa-solid fa-check"></i> Monitored on Start</span>
+            </div>
+          </div>
+
+          <!-- Error Notice -->
+          <div id="setupErrorNotice" style="display: none; background: #FEE2E2; color: #991B1B; padding: 0.75rem 1rem; border-radius: var(--radius-sm); margin-bottom: 1rem; font-size: 0.85rem; font-weight: 600;">
+            <i class="fa-solid fa-triangle-exclamation"></i> <span id="setupErrorMessage">Camera and microphone access are required to start this interview. Please allow permissions in browser settings.</span>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="requestMediaPermissions()"><i class="fa-solid fa-arrows-rotate"></i> Re-test Hardware</button>
+            <button type="button" class="btn btn-primary" id="btnStartInterviewWithFullscreen" disabled onclick="startVerifiedInterviewSession()"><i class="fa-solid fa-play"></i> Start Interview & Enter Fullscreen</button>
+          </div>
+        </div>
+
+        <!-- Active Question Screen -->
+        <div id="simulatorQuestionScreen" style="display: none;">
+          <!-- Session Lifecycle Control Bar -->
+          <div id="sessionControlsBar" style="display: flex; justify-content: space-between; align-items: center; background: var(--primary-light); padding: 0.75rem 1rem; border-radius: var(--radius-sm); margin-bottom: 1rem; border: 1px solid var(--border-color);">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted);">Session Status:</span>
+              <span id="sessionStatusBadge" class="badge-status info">CREATED</span>
+            </div>
+            <div style="display: flex; gap: 0.5rem;" id="sessionActionButtonsContainer">
+              <!-- Dynamically populated by script.js -->
+            </div>
+          </div>
+
+          <div class="interview-viewport-split">
+            <!-- Left Pane: Webcam Preview & Media Stream -->
+            <div class="interview-left-pane">
+              <div id="questionWebcamMount"></div>
+            </div>
+
+            <!-- Right Pane: Question & Input Interface -->
+            <div class="interview-right-pane">
+              <div class="simulator-header">
+                <div>
+                  <span style="font-size: 0.8rem; font-weight: 700; color: var(--primary);" id="simCategoryTag">TECHNICAL ROUND</span>
+                  <h4 id="simQuestionCounter" style="font-weight: 700; margin: 0.2rem 0;">Question 1 of 5</h4>
+                </div>
+                <div class="simulator-timer">
+                  <i class="fa-solid fa-clock"></i> Total: <span id="simTimerDisplay">00:00</span>
+                </div>
+              </div>
+
+              <!-- Active Question Timer & Progress Stats -->
+              <div style="display: flex; gap: 1.25rem; margin: 0.5rem 0 1rem 0; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); flex-wrap: wrap;">
+                <span><i class="fa-solid fa-stopwatch" style="color: var(--primary);"></i> Question Time: <strong id="simQuestionTimerDisplay" style="color: var(--primary);">00:00</strong></span>
+                <span id="simRemainingTimeWrapper" style="display: none;"><i class="fa-solid fa-hourglass-half" style="color: #EF4444;"></i> Time Remaining: <strong id="simRemainingTimerDisplay" style="color: #EF4444;">--:--</strong></span>
+                <span><i class="fa-solid fa-list-check" style="color: var(--secondary);"></i> Completed: <strong id="simCompletedCountDisplay" style="color: var(--text-main);">0 / 0</strong></span>
+              </div>
+
+              <div style="font-size: 1.05rem; font-weight: 600; margin-bottom: 1.25rem; color: var(--text-main);" id="simQuestionText">
+                Loading question...
+              </div>
+
+              <div id="simOptionsContainer">
+                <!-- Rendered by script.js -->
+              </div>
+
+              <!-- Module 5: Live Speech-to-Text & Communication Analysis Panel -->
+              <div id="simSpeechAnalysisPanel" style="background: var(--bg-surface); padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); margin-top: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 700;">
+                  <span id="speechStatusBadge" class="badge-status info" style="font-size: 0.75rem;"><i class="fa-solid fa-microphone"></i> Live Speech: Listening...</span>
+                  <div style="display: flex; gap: 1rem; color: var(--text-muted); font-size: 0.8rem;">
+                    <span>Pace: <strong id="liveWpmDisplay" style="color: var(--primary);">0 WPM</strong></span>
+                    <span>Fillers: <strong id="liveFillerCountDisplay" style="color: #EF4444;">0</strong></span>
+                  </div>
+                </div>
+                <div id="liveTranscriptBox" style="font-size: 0.85rem; min-height: 48px; max-height: 80px; overflow-y: auto; background: var(--bg-main); padding: 0.5rem 0.75rem; border-radius: var(--radius-xs); border: 1px solid var(--border-color); color: var(--text-muted); font-style: italic;">
+                  Speak clearly into your microphone... Live transcript will appear here.
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                <button class="btn btn-secondary btn-sm" id="simPrevBtn" onclick="navigateSimQuestion(-1)"><i class="fa-solid fa-chevron-left"></i> Previous</button>
+                <div style="display: flex; gap: 0.5rem;">
+                  <button class="btn btn-secondary btn-sm" onclick="skipSimQuestion()">Skip Question</button>
+                  <button class="btn btn-primary btn-sm" id="simNextBtn" onclick="navigateSimQuestion(1)">Next Question <i class="fa-solid fa-chevron-right"></i></button>
+                  <button class="btn btn-primary btn-sm" id="simSubmitBtn" onclick="openSubmitConfirmModal()" style="display: none; background: #10B981;"><i class="fa-solid fa-paper-plane"></i> Submit Interview</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- Results Screen -->
+        <div id="simulatorResultScreen" style="display: none; text-align: center; padding: 1rem 0;">
+          <div style="width: 72px; height: 72px; border-radius: 50%; background: #D1FAE5; color: #059669; font-size: 2rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto;">
+            <i class="fa-solid fa-trophy"></i>
+          </div>
+          <h3 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.25rem;" id="simResultHeading">Interview Completed!</h3>
+          <p style="color: var(--text-muted); font-size: 0.9rem;" id="simResultSubtext">Your interview score and Module 5 communication metrics have been generated.</p>
+          <div style="background: var(--primary-light); padding: 1.25rem; border-radius: var(--radius-md); margin: 1.25rem 0; border: 1px solid var(--border-color);">
+            <div style="font-size: 2.25rem; font-weight: 800; color: var(--primary);" id="simFinalScore">0.0%</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);" id="simFinalMeta">Answered 5 of 5 questions in 2m 15s</div>
+          </div>
+          <button class="btn btn-primary btn-sm" id="btnBackToDashboard" onclick="finishAndNavigateToDashboard()"><i class="fa-solid fa-house"></i> Done / Back to Dashboard</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Submit Confirmation Modal -->
+  <div class="smarthire-modal-backdrop" id="submitConfirmModal" style="z-index: 100001;">
+    <div class="smarthire-modal" style="max-width: 480px; text-align: center;">
+      <div class="smarthire-modal-header" style="justify-content: center; background: transparent;">
+        <h3 style="color: var(--primary);"><i class="fa-solid fa-circle-question"></i> Submit Interview Confirmation</h3>
+      </div>
+      <div class="smarthire-modal-body" style="padding: 1.5rem;">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--primary-light); color: var(--primary); font-size: 1.5rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto;">
+          <i class="fa-solid fa-paper-plane"></i>
+        </div>
+        <h4 style="font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);">Are you sure you want to submit the interview?</h4>
+        <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.5rem;">Once submitted, you cannot return to the interview. Your answers, video recording, and speech analysis will be finalized.</p>
+        <div style="display: flex; gap: 0.75rem; justify-content: center;">
+          <button class="btn btn-secondary btn-sm" onclick="closeModal('submitConfirmModal')">Cancel</button>
+          <button class="btn btn-primary btn-sm" id="btnConfirmSubmitInterview" onclick="confirmSubmitInterview()" style="background: #10B981; border-color: #10B981;"><i class="fa-solid fa-check"></i> Submit Interview</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Fullscreen Exit Warning Modal -->
+  <div class="smarthire-modal-backdrop" id="fullscreenWarningModal" style="z-index: 100000;">
+    <div class="smarthire-modal" style="max-width: 480px; text-align: center;">
+      <div class="smarthire-modal-header" style="justify-content: center; background: transparent;">
+        <h3 style="color: #EF4444;" id="fsWarningTitle"><i class="fa-solid fa-triangle-exclamation"></i> Fullscreen Exit Warning</h3>
+      </div>
+      <div class="smarthire-modal-body">
+        <div style="width: 64px; height: 64px; border-radius: 50%; background: #FEE2E2; color: #EF4444; font-size: 1.75rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto;">
+          <i class="fa-solid fa-expand"></i>
+        </div>
+        <h4 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;" id="fsWarningHeader">Warning 1 of 4</h4>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.25rem;" id="fsWarningBody">
+          Fullscreen Requirement: This mock interview must remain in fullscreen mode. Warning: 1 of 4 allowed warnings.
+        </p>
+        <button class="btn btn-primary btn-full" onclick="reenterFullscreenFromWarning()"><i class="fa-solid fa-compress"></i> Return to Fullscreen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Look-Away Attention Reminder Modal -->
+  <div class="smarthire-modal-backdrop" id="lookAwayWarningModal" style="z-index: 100001;">
+    <div class="smarthire-modal" style="max-width: 480px; text-align: center;">
+      <div class="smarthire-modal-header" style="justify-content: center; background: transparent;">
+        <h3 style="color: #F59E0B;" id="lookAwayWarningTitle"><i class="fa-solid fa-eye-slash"></i> Attention Reminder</h3>
+      </div>
+      <div class="smarthire-modal-body">
+        <div style="width: 64px; height: 64px; border-radius: 50%; background: #FEF3C7; color: #D97706; font-size: 1.75rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto;">
+          <i class="fa-solid fa-user-clock"></i>
+        </div>
+        <h4 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem;">Maintain Screen Focus</h4>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.25rem;" id="lookAwayWarningBody">
+          Please keep your attention on the interview screen and avoid looking away for an extended period.
+        </p>
+        <button class="btn btn-primary btn-full" onclick="closeModal('lookAwayWarningModal')"><i class="fa-solid fa-check"></i> I Understand</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Device Detection Warning Modal -->
+  <div class="smarthire-modal-backdrop" id="mobileWarningModal" style="z-index: 100002;">
+    <div class="smarthire-modal" style="max-width: 480px; text-align: center;">
+      <div class="smarthire-modal-header" style="justify-content: center; background: transparent;">
+        <h3 style="color: #EF4444;" id="mobileWarningTitle"><i class="fa-solid fa-mobile-screen-button"></i> Mobile Device Detected</h3>
+      </div>
+      <div class="smarthire-modal-body">
+        <div style="width: 64px; height: 64px; border-radius: 50%; background: #FEE2E2; color: #EF4444; font-size: 1.75rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto;">
+          <i class="fa-solid fa-mobile"></i>
+        </div>
+        <h4 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem;">Remove Mobile Device</h4>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.25rem;" id="mobileWarningBody">
+          A mobile device has been detected in the camera view. Please remove it from the interview area and continue.
+        </p>
+        <button class="btn btn-primary btn-full" onclick="closeModal('mobileWarningModal')"><i class="fa-solid fa-check"></i> Continued Interview</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 4. Detailed History Report Modal -->
+
+  <div class="smarthire-modal-backdrop" id="interviewDetailModal">
+    <div class="smarthire-modal" style="max-width: 650px;">
+      <div class="smarthire-modal-header">
+        <h3><i class="fa-solid fa-file-invoice"></i> Detailed Interview Report</h3>
+        <button class="smarthire-modal-close" onclick="closeModal('interviewDetailModal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="smarthire-modal-body" id="interviewDetailBody">
+        <!-- Rendered dynamically by script.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Track Progress Modal -->
+  <div class="smarthire-modal-backdrop" id="trackProgressModal">
+    <div class="smarthire-modal" style="max-width: 700px;">
+      <div class="smarthire-modal-header">
+        <h3><i class="fa-solid fa-arrow-trend-up"></i> Track Candidate Progress</h3>
+        <button class="smarthire-modal-close" onclick="closeModal('trackProgressModal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="smarthire-modal-body">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; background: var(--primary-light); padding: 1rem 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <div>
+            <div style="font-size: 0.8rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted);">Current Mastery Status</div>
+            <div class="level-badge" id="candProgressLevel" style="margin-top: 0.35rem;">
+              <i class="fa-solid fa-award"></i> Level 1 - Novice Learner
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary);" id="candProgressCount">0</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Interviews Completed</div>
+          </div>
+        </div>
+
+        <h4 style="font-weight: 700; margin-bottom: 0.75rem;">Unlocked Achievements & Badges</h4>
+        <div class="achievements-grid" id="candBadgesGrid">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <h4 style="font-weight: 700; margin: 1.5rem 0 0.75rem 0;">Skill Domain Mastery</h4>
+        <div id="candSkillBars">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Recruiter Behavior Report Modal -->
+  <div class="smarthire-modal-backdrop" id="recruiterBehaviorReportModal">
+    <div class="smarthire-modal" style="max-width: 800px;">
+      <div class="smarthire-modal-header" style="background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #FFFFFF;">
+        <h3 style="color: #FFFFFF;"><i class="fa-solid fa-brain"></i> Candidate Module 6 Behavioral & Visual Analysis Report</h3>
+        <button class="smarthire-modal-close" onclick="closeModal('recruiterBehaviorReportModal')" style="color: #FFFFFF;"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="smarthire-modal-body" id="recruiterBehaviorReportBody">
+        <!-- Rendered dynamically by script.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Score Sharing Consent Modal -->
+  <div class="smarthire-modal-backdrop" id="scoreSharingConsentModal" style="display:none; z-index: 9999;">
+    <div class="smarthire-modal" style="max-width: 520px; text-align: center; border: 2px solid var(--primary);">
+      <div class="smarthire-modal-header" style="background: var(--bg-main);">
+        <h3 style="margin:0 auto; color: var(--primary);"><i class="fa-solid fa-shield-halved"></i> Share Your Interview Report?</h3>
+      </div>
+      <div class="smarthire-modal-body" style="padding: 1.5rem;">
+        <p style="font-size: 0.95rem; color: var(--text-main); margin-bottom: 1.25rem; line-height: 1.5;">
+          Your interview performance report contains your interview scores and performance analysis. Would you like to allow the recruiter to view your performance report?
+        </p>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+          <button class="btn btn-primary" id="btn-consent-yes" onclick="submitConsentChoiceUI(true)"><i class="fa-solid fa-check"></i> Yes, Share My Report</button>
+          <button class="btn btn-secondary" id="btn-consent-no" onclick="submitConsentChoiceUI(false)"><i class="fa-solid fa-lock"></i> No, Keep My Report Private</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom JavaScript -->
+  <script src="js/script.js"></script>
+</body>
+</html>
+
