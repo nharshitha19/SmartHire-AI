@@ -113,7 +113,8 @@ app.add_middleware(
         "http://127.0.0.1:8000",
         "http://localhost:8000",
         "http://127.0.0.1:3000",
-        "http://localhost:3000"
+        "http://localhost:3000",
+        "https://smart-hire-ai-xi-five.vercel.app"
     ],
     allow_origin_regex=r"https?://(127\.0\.0\.1|localhost)(:\d+)?",
     allow_credentials=True,
@@ -368,7 +369,7 @@ def seed_database():
         db.close()
 
 # Run database seed
-seed_database()
+#seed_database()
 
 @app.get("/")
 def read_root():
@@ -382,3 +383,28 @@ def read_root():
 @app.get("/api/health")
 def health_check():
     return {"status": "healthy"}
+from fastapi import Depends
+from sqlalchemy import text
+
+@app.get("/")
+def read_root():
+    return {
+        "status": "online",
+        "system": "SmartHire AI Backend API",
+        "module": "Module 1 - Authentication, Database Integration & User Management",
+        "docs_url": "/docs"
+    }
+
+@app.get("/api/health")
+def health_check():
+    return {"status": "healthy"}
+
+@app.get("/health")
+def db_health_check(db: Session = Depends(get_db)):
+    try:
+        db.execute(text("SELECT 1"))
+        return {"status": "connected"}
+    except Exception as e:
+        return {"status": "error", "detail": str(e)}
+
+
