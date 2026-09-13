@@ -16,11 +16,6 @@ email-validator
 numpy
 Pillow
 opencv-python
-scikit-learn
-pandas
-torch
-tensorflow
-python-dotenv
 
 
 
