@@ -16,6 +16,7 @@ email-validator
 numpy
 Pillow
 opencv-python
+reportlab
 
 
 
