@@ -14,5 +14,6 @@ httpx>=0.24.1
 google-auth>=2.20.0
 email-validator
 numpy
+Pillow
 
 
