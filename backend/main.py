@@ -21,6 +21,8 @@ from models.recruiter import RecruiterProfile
 from models.interview import QuestionBank, Interview, InterviewQuestion, InterviewSession, AuditLog, InterviewBehaviorAnalysis, CandidatePerformanceReport
 from models.consent import InterviewConsent
 from models.notification import Notification
+from database import get_db
+
 
 from security.password import hash_password
 
