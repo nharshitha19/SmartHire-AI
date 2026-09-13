@@ -15,5 +15,7 @@ google-auth>=2.20.0
 email-validator
 numpy
 Pillow
+opencv-python
+
 
 
