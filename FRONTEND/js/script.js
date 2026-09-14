@@ -77,11 +77,15 @@ function initDatabaseSchema() {
 
 const SmartHireAuth = {
   API_BASE: 'https://smarthire-ai-6830.onrender.com',
+   
+
 
   getUser() {
     const raw = localStorage.getItem('smarthire_user');
     return raw ? JSON.parse(raw) : null;
   },
+  
+
 
   getToken() {
     return localStorage.getItem('smarthire_jwt_token');
@@ -250,6 +254,7 @@ const SmartHireAuth = {
     return { success: true, user: updatedUser };
   }
 };
+console.log("API_BASE is:", SmartHireAuth.API_BASE);
 
 let authRedirectTimeout = null;
 
