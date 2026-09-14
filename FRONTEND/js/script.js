@@ -76,7 +76,7 @@ function initDatabaseSchema() {
    ========================================================================== */
 
 const SmartHireAuth = {
-  API_BASE: process.env.NEXT_PUBLIC_API_BASE_URL,
+  API_BASE: 'https://smarthire-ai-6830.onrender.com',
 
   getUser() {
     const raw = localStorage.getItem('smarthire_user');
